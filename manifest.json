@@ -1,0 +1,25 @@
+{
+  "name": {
+    "en": "Kick",
+    "ru": "Kick",
+    "uk": "Kick"
+  },
+  "description": {
+    "en": "Integration with Kick API: live chat via Pusher, follows, subscriptions, channel rewards, KICKs gifts, and stream events.",
+    "ru": "Интеграция с Kick API: чат через Pusher, фолловы, подписки, награды канала, KICKs и события стрима.",
+    "uk": "Інтеграція з Kick API: чат через Pusher, фоловери, підписки, нагороди каналу, KICKs та події стріму."
+  },
+  "type": "platform.streaming",
+  "version": "1.0.0",
+  "author": "RocketMan System",
+  "icon": "logo.png",
+  "permissions": [
+    "NETWORK_REQUEST",
+    "NETWORK_WEBSOCKET",
+    "WEB_END_POINTS",
+    "DASHBOARD_EVENTS",
+    "DASHBOARD_CHAT",
+    "STATUS",
+    "NOTIFY"
+  ]
+}
