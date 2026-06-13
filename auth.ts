@@ -2,6 +2,7 @@ import {
   CLIENT_ID,
   OAUTH_AUTHORIZE_URL,
   REDIRECT_URI,
+  resolveApiServerUrl,
   SCOPES,
 } from './constants';
 import { KickApi, logKickOAuth } from './api';
@@ -74,7 +75,8 @@ events.On('kickAuthCallback', async ({ query }) => {
     oauth_state?: string;
   }>();
 
-  KickApi.setApiServer(params.api_server);
+  const resolvedApiServer = resolveApiServerUrl(params.api_server);
+  KickApi.setApiServer(resolvedApiServer);
 
   logKickOAuth('log', 'OAuth callback received', {
     hasCode: Boolean(code),
@@ -82,7 +84,7 @@ events.On('kickAuthCallback', async ({ query }) => {
     stateMatches: params.oauth_state === state,
     hasVerifier: Boolean(params.pkce_verifier?.trim()),
     configuredApiServer: params.api_server || null,
-    resolvedApiServer: KickApi.apiServer,
+    resolvedApiServer,
   });
 
   if (!params.oauth_state || params.oauth_state !== state) {

@@ -3,6 +3,7 @@ import {
   buildAuthServerSelectOptions,
   DEFAULT_API_SERVER,
   REQUIRED_SCOPES,
+  resolveApiServerUrl,
   SCOPES,
 } from './constants';
 import { logoutButtonLabel } from './i18n';
@@ -37,8 +38,10 @@ const buildConfigFields = (
   access_token: string,
   kick_username: string
 ): Parameters<typeof GenerateConfig>[0] => {
-  const fields: Parameters<typeof GenerateConfig>[0] = [
-    {
+  const fields: Parameters<typeof GenerateConfig>[0] = [];
+
+  if (isDeveloperMode) {
+    fields.push({
       key: 'api_server',
       type: 'select',
       default: DEFAULT_API_SERVER,
@@ -55,7 +58,10 @@ const buildConfigFields = (
           uk: 'URL сервера авторизації (домен + порт)',
         },
       },
-    },
+    });
+  }
+
+  fields.push(
     {
       key: 'access_token',
       type: 'text',
@@ -80,8 +86,8 @@ const buildConfigFields = (
       key: 'oauth_state',
       type: 'text',
       default: '',
-    },
-  ];
+    }
+  );
 
   if (access_token) {
     fields.push({
@@ -112,7 +118,7 @@ export const RegenerateConfig = () => {
   api.config.getParams().then(params => {
     const access_token = params.access_token || '';
     const refresh_token = params.refresh_token || '';
-    const api_server = params.api_server || DEFAULT_API_SERVER;
+    const api_server = resolveApiServerUrl(params.api_server);
     const token_expires_at =
       typeof params.token_expires_at === 'number' ? params.token_expires_at : 0;
     const kick_username =
