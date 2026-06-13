@@ -11,6 +11,7 @@ import { mergeKickParams } from './params';
 export type KickUser = {
   user_id: number;
   name: string;
+  username?: string;
   profile_picture?: string;
   channel_slug?: string;
 };
@@ -496,6 +497,7 @@ export const KickApi = new (class {
       return {
         user_id: user.user_id,
         name: user.name || user.username || String(user.user_id),
+        username: user.username,
         profile_picture: user.profile_picture,
         channel_slug: channelSlug || undefined,
       };
@@ -536,6 +538,7 @@ export const KickApi = new (class {
       return {
         user_id: user.user_id,
         name: user.name || user.username || String(user.user_id),
+        username: user.username,
         profile_picture: user.profile_picture,
       };
     } catch {

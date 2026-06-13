@@ -6,6 +6,7 @@ import {
 } from './constants';
 import { KickApi, logKickOAuth } from './api';
 import { RegenerateConfig } from './config';
+import { authMessages } from './i18n';
 import { mergeKickParams } from './params';
 import { stopKickTracking } from './tracking';
 
@@ -20,6 +21,9 @@ const buildKickAuthUrl = (challenge: string, state: string) => {
   query.set('state', state);
   return `${OAUTH_AUTHORIZE_URL}?${query.toString()}`;
 };
+
+const resolveKickUsername = (user: Awaited<ReturnType<typeof KickApi.GetMe>>) =>
+  user?.username?.trim() || user?.name?.trim() || '';
 
 events.On('kickLogin', async () => {
   const { verifier, challenge } = crypto.createPkce();
@@ -41,6 +45,7 @@ events.On('kickLogout', async () => {
     token_expires_at: 0,
     pkce_verifier: '',
     oauth_state: '',
+    kick_username: '',
   });
   RegenerateConfig();
 });
@@ -51,7 +56,7 @@ events.On('kickAuthCallback', async ({ query }) => {
   const error = typeof query.error === 'string' ? query.error : '';
   if (error) {
     return {
-      redirect: ui.auth.generateFail(`Kick authorization failed: ${error}`),
+      redirect: ui.auth.generateFail(authMessages.authorizationFailed(error)),
     };
   }
 
@@ -59,7 +64,7 @@ events.On('kickAuthCallback', async ({ query }) => {
   const state = typeof query.state === 'string' ? query.state : '';
   if (!code) {
     return {
-      redirect: ui.auth.generateFail('Missing authorization code'),
+      redirect: ui.auth.generateFail(authMessages.missingAuthorizationCode()),
     };
   }
 
@@ -82,22 +87,25 @@ events.On('kickAuthCallback', async ({ query }) => {
 
   if (!params.oauth_state || params.oauth_state !== state) {
     return {
-      redirect: ui.auth.generateFail('Invalid OAuth state'),
+      redirect: ui.auth.generateFail(authMessages.invalidOAuthState()),
     };
   }
 
   const verifier = params.pkce_verifier?.trim();
   if (!verifier) {
     return {
-      redirect: ui.auth.generateFail('Missing PKCE verifier'),
+      redirect: ui.auth.generateFail(authMessages.missingPkceVerifier()),
     };
   }
 
   const exchanged = await KickApi.exchangeAuthorizationCode(code, verifier);
   if (!exchanged.success || !exchanged.accessToken) {
-    const message = exchanged.message || 'Token exchange failed';
     return {
-      redirect: ui.auth.generateFail(message),
+      redirect: ui.auth.generateFail(
+        exchanged.message
+          ? authMessages.authorizationFailed(exchanged.message)
+          : authMessages.tokenExchangeFailed()
+      ),
     };
   }
 
@@ -106,19 +114,24 @@ events.On('kickAuthCallback', async ({ query }) => {
       ? Date.now() + exchanged.expiresIn * 1000
       : Date.now() + 3600 * 1000;
 
+  KickApi.accessToken = exchanged.accessToken;
+  KickApi.refreshToken = exchanged.refreshToken || null;
+
+  const user = await KickApi.GetMe();
+  const kickUsername = resolveKickUsername(user);
+
   await mergeKickParams({
     access_token: exchanged.accessToken,
     refresh_token: exchanged.refreshToken || '',
     token_expires_at: expiresAt,
     pkce_verifier: '',
     oauth_state: '',
+    kick_username: kickUsername,
   });
 
   RegenerateConfig();
 
   return {
-    redirect: ui.auth.generateSuccess(
-      'Authorization successful. You can close this window.'
-    ),
+    redirect: ui.auth.generateSuccess(authMessages.authorizationSuccessful()),
   };
 });
