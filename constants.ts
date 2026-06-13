@@ -2,9 +2,9 @@ export const PLATFORM = 'kick';
 
 export const CLIENT_ID = '01KTE43RJ9JDJCNM9R2JFGJ6QZ';
 
-export const DEFAULT_API_SERVER = 'https://rocketman-streams.com:2083';
-export const AUTH_SERVER_RU_URL = 'https://ru.rocketman-streams.com:2083';
-export const AUTH_SERVER_LOCAL_URL = 'http://localhost:2082';
+export const DEFAULT_API_SERVER = 'https://rocketman-streams.com:443';
+export const AUTH_SERVER_RU_URL = 'https://ru.rocketman-streams.com:443';
+export const AUTH_SERVER_LOCAL_URL = 'https://local.rocketman-streams.com:443';
 
 export const buildAuthServerSelectOptions = (includeLocalhost: boolean) => {
   const urlLabel = (url: string) => ({
