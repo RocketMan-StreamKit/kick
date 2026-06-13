@@ -11,7 +11,7 @@
     "uk": "Інтеграція з Kick API: чат через Pusher, фоловери, підписки, нагороди каналу, KICKs та події стріму."
   },
   "type": "platform.streaming",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "RocketMan System",
   "icon": "logo.png",
   "permissions": [
